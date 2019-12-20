@@ -39,7 +39,7 @@ RUN yum -y install \
     # Install mono
     mono-core mono-locale-extras \
     # Install Xvbf
-    Xvfb \
+    Xvfb which \
     # Install x11vnc
     x11vnc && \ 
     yum clean all
@@ -72,12 +72,11 @@ RUN rpm -Uvh /tmp_/rpm/1C_Enterprise83-common-8.3.10-2699.x86_64.rpm \
     /tmp_/rpm/1C_Enterprise83-server-8.3.10-2699.x86_64.rpm \
     /tmp_/rpm/1C_Enterprise83-client-8.3.10-2699.x86_64.rpm
 
-# Install ovm & oscript
-# RUN wget https://github.com/silverbulleters/ovm/releases/download/v1.0.0-RC9/ovm.exe && \
-#     mono ovm.exe install 1.20 && \
-#     mono ovm use stable && \
-#     opm install vanessa-runner && \
-#     opm install add
+# Install oscript
+RUN rpm -Uvh /tmp_/rpm/onescript-engine-1.2.0-1.fc26.noarch.rpm && \
+    tar -xcvf /tmp_/oscript.tar.gz /usr/share && \
+    chown -R usr1cv8:grp1cv8 /usr/share/oscript && \
+    chmod 755 /usr/share/oscript
 
 # Add nethasp
 RUN mkdir -p /opt/1C/v8.3/x86_64/conf/
@@ -105,8 +104,6 @@ RUN mkdir -p /home/usr1cv8/.fonts/ && mkdir -p /usr/share/fonts/truetype/ && \
     cp /tmp_/fonts/* /home/usr1cv8/.fonts/ && cp /tmp_/fonts/* /usr/share/fonts/truetype/
 RUN chown -R usr1cv8:grp1cv8 /home/usr1cv8/.fonts
 RUN fc-cache -fv
-
-RUN yum install -y which
 
 USER usr1cv8
 
