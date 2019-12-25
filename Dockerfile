@@ -81,7 +81,7 @@ ENV PATH="/opt/1C/v8.3/x86_64:${PATH}"
 
 # Add volume
 VOLUME /var/log/1C
-VOLUME /home/usr1cv8
+#VOLUME /home/usr1cv8
 
 # set rootpass
 RUN echo 'root' | passwd root --stdin
