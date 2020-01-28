@@ -7,8 +7,8 @@ docker run --name client-1c \
   --net my_app_net \
   -e VNC_PORT=5900 \
   -p 5900:5900 \
-  -v client-1c:/home/usr1cv8 \
   grahovsky/client-1c:latest
 
 #--privileged
+#--volume client-1c:/home/usr1cv8 \
 
