@@ -8,8 +8,20 @@ ENV LANG ru_RU.utf8
 RUN localedef -f UTF-8 -i ru_RU ru_RU.UTF-8
 
 # Perform updates
+# add mono repo
 RUN rpmkeys --import "http://pool.sks-keyservers.net/pks/lookup?op=get&search=0x3fa7e0328081bff6a14da29aa6a19b38d3d831ef" && \
     su -c 'curl https://download.mono-project.com/repo/centos7-stable.repo | tee /etc/yum.repos.d/mono-centos7-stable.repo'
+
+# add liberica java
+RUN gpg --keyserver keys2.kfwebs.net --recv-keys 32e9750179fcea62 \
+    gpg --export -a 32e9750179fcea62 | tee /etc/pki/rpm-gpg/RPM-GPG-KEY-bellsoft > /dev/null
+RUN echo $'[BellSoft] \n\
+name=BellSoft Repository \n\
+baseurl=https://yum.bell-sw.com \n\
+enabled=1 \n\
+gpgcheck=1 \n\
+gpgkey=https://download.bell-sw.com/pki/GPG-KEY-bellsoft \n\
+priority=1' > /etc/yum.repos.d/bellsoft.repo
 
 # Install EPEL
 RUN yum -y update; yum -y install epel-release; yum clean all
@@ -17,6 +29,10 @@ RUN yum -y update; yum -y install epel-release; yum clean all
 RUN yum -y update; yum -y install \
     curl \
     wget \
+    # zip unzip
+    zip unzip \
+    # xdg open
+    xdg-utils \
     # fonts 
     fontconfig freetype libgsf unixODBC \
     #cabextract \
@@ -30,15 +46,18 @@ RUN yum -y update; yum -y install \
     # Install Xvfb
     Xvfb which \
     # Install x11vnc
-    x11vnc; \ 
+    x11vnc \
+    # Install java for allure
+    # java-11-openjdk;\ 
+    bellsoft-java11; \
     yum clean all
 
 # copy files
 ADD distrib/ /distrib/
 
 # Install dependences
-RUN rpm -Uvh /distrib/rpm/gtk2-2.24.31-1.el7.x86_64.rpm \ 
-    /distrib/rpm/webkitgtk-2.4.9-1.2.x86_64.rpm
+RUN rpm -Uvh /distrib/rpm/lib/gtk2-2.24.31-1.el7.x86_64.rpm \ 
+    /distrib/rpm/lib/webkitgtk-2.4.9-1.2.x86_64.rpm
 
 # OKD
 ENV OKD_USER_ID 1001080000
@@ -52,8 +71,12 @@ RUN rpm -Uvh /distrib/rpm/1C_Enterprise83-common-8.3.10-2699.x86_64.rpm \
     /distrib/rpm/1C_Enterprise83-client-8.3.10-2699.x86_64.rpm
 
 # Install oscript
-RUN rpm -Uvh /distrib/rpm/onescript-engine-1.2.0-1.fc26.noarch.rpm && \
-    tar -zxvf /distrib/oscript.tar.gz -C /usr/share
+RUN rpm -Uvh /distrib/rpm/lib/onescript-engine-1.2.0-1.fc26.noarch.rpm && \
+    tar -zxvf /distrib/oscript.tar.gz -C /usr/share && \
+    cp /distrib/usr_bin/* /usr/bin 
+
+# Install allure
+RUN tar -zxf /distrib/allure-commandline-2.13.1.tgz -C /distrib
 
 # Add premission add directory
 Run mkdir /opt/1C/v8.3/x86_64/conf/ && chown -R usr1cv8:grp1cv8 /opt/1C/v8.3/x86_64/conf/ && \
@@ -71,8 +94,8 @@ ENV VNC_PORT=$VNC_PORT
 # Expose port vnc
 EXPOSE $VNC_PORT
 
-# Add path 1c
-ENV PATH="/opt/1C/v8.3/x86_64:${PATH}"
+# Add path 1c & allure
+ENV PATH="/opt/1C/v8.3/x86_64:/distrib/allure-2.13.1/bin:${PATH}"
 
 # Add volume
 VOLUME /var/log/1C

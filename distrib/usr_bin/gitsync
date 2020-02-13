@@ -1,0 +1,2 @@
+#!/bin/bash
+oscript "/usr/share/oscript/lib/gitsync/src/cmd/gitsync.os" "$@"
