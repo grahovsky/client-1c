@@ -13,15 +13,15 @@ RUN rpmkeys --import "http://pool.sks-keyservers.net/pks/lookup?op=get&search=0x
     su -c 'curl https://download.mono-project.com/repo/centos7-stable.repo | tee /etc/yum.repos.d/mono-centos7-stable.repo'
 
 # add liberica java
-RUN gpg --keyserver keys2.kfwebs.net --recv-keys 32e9750179fcea62 \
-    gpg --export -a 32e9750179fcea62 | tee /etc/pki/rpm-gpg/RPM-GPG-KEY-bellsoft > /dev/null
-RUN echo $'[BellSoft] \n\
-name=BellSoft Repository \n\
-baseurl=https://yum.bell-sw.com \n\
-enabled=1 \n\
-gpgcheck=1 \n\
-gpgkey=https://download.bell-sw.com/pki/GPG-KEY-bellsoft \n\
-priority=1' > /etc/yum.repos.d/bellsoft.repo
+# RUN gpg --keyserver keys2.kfwebs.net --recv-keys 32e9750179fcea62 \
+#     gpg --export -a 32e9750179fcea62 | tee /etc/pki/rpm-gpg/RPM-GPG-KEY-bellsoft > /dev/null
+# RUN echo $'[BellSoft] \n\
+# name=BellSoft Repository \n\
+# baseurl=https://yum.bell-sw.com \n\
+# enabled=1 \n\
+# gpgcheck=1 \n\
+# gpgkey=https://download.bell-sw.com/pki/GPG-KEY-bellsoft \n\
+# priority=1' > /etc/yum.repos.d/bellsoft.repo
 
 # Install EPEL
 RUN yum -y update; yum -y install epel-release; yum clean all
@@ -47,10 +47,10 @@ RUN yum -y update; yum -y install \
     Xvfb which \
     # Install x11vnc
     x11vnc \
-    # Install java for allure
-    # java-11-openjdk;\ 
-    bellsoft-java11; \
-    yum clean all
+    # Install java for allure, edt
+    # java-11-openjdk \ 
+    # bellsoft-java11 \
+    ;yum clean all
 
 # copy files
 ADD distrib/ /distrib/
@@ -76,7 +76,7 @@ RUN rpm -Uvh /distrib/rpm/lib/onescript-engine-1.2.0-1.fc26.noarch.rpm && \
     cp /distrib/usr_bin/* /usr/bin 
 
 # Install allure
-RUN tar -zxf /distrib/allure-commandline-2.13.1.tgz -C /distrib
+# RUN tar -zxf /distrib/allure_2_12.tgz -C /distrib
 
 # Add premission add directory
 Run mkdir /opt/1C/v8.3/x86_64/conf/ && chown -R usr1cv8:grp1cv8 /opt/1C/v8.3/x86_64/conf/ && \
@@ -94,12 +94,15 @@ ENV VNC_PORT=$VNC_PORT
 # Expose port vnc
 EXPOSE $VNC_PORT
 
-# Add path 1c & allure
-ENV PATH="/opt/1C/v8.3/x86_64:/distrib/allure-2.13.1/bin:${PATH}"
+# Add path 1c
+ENV PATH="/opt/1C/v8.3/x86_64:${PATH}"
+# Add path allure
+# ENV PATH="/distrib/allure_2_12/bin:${PATH}"
+# ENV ALLURE_HOME="/distrib/allure_2_12"
 
 # Add volume
 VOLUME /var/log/1C
-#VOLUME /home/usr1cv8
+# VOLUME /home/usr1cv8
 
 # set rootpass
 RUN echo 'root' | passwd root --stdin
@@ -108,7 +111,7 @@ RUN echo 'root' | passwd root --stdin
 USER usr1cv8
 
 # Add fonts
-#fonts msttcore-fonts-installer-2.6-1.noarch.rpm - error
+# fonts msttcore-fonts-installer-2.6-1.noarch.rpm - error
 RUN mkdir -p /home/usr1cv8/.fonts/ && cp /distrib/fonts/* /home/usr1cv8/.fonts/ && \
     fc-cache -fv
 
@@ -122,4 +125,5 @@ RUN mkdir -p  /opt/1C/v8.3/x86_64/conf/ && cp /distrib/config/nethasp.ini /opt/1
 Add entrypoint.sh /tmp/
 
 ENTRYPOINT ["/bin/sh", "-x", "/tmp/entrypoint.sh"]
-CMD ["1cv8s"]
+# for run startup menu 1c
+#CMD ["1cv8s"]
