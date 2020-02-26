@@ -28,6 +28,7 @@ RUN yum -y update; yum -y install epel-release; yum clean all
 # Install other package
 RUN yum -y update; yum -y install \
     curl \
+    git \
     wget \
     # zip unzip
     zip unzip \
