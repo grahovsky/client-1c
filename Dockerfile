@@ -76,6 +76,13 @@ RUN rpm -Uvh /distrib/rpm/lib/onescript-engine-1.2.0-1.fc26.noarch.rpm && \
     tar -zxvf /distrib/oscript.tar.gz -C /usr/share && \
     cp /distrib/usr_bin/* /usr/bin 
 
+# Install scrot
+RUN rpm -Uvh http://packages.psychotic.ninja/7/base/x86_64/RPMS/psychotic-release-1.0.0-1.el7.psychotic.noarch.rpm && \
+    yum -y --enablerepo=psychotic install scrot
+
+# Tuning xvfb-run "no such process" error
+RUN sed -i 's/kill \$XVFBPID/\#kill \$XVFBPID/g' /usr/bin/xvfb-run
+
 # Install allure
 # RUN tar -zxf /distrib/allure_2_12.tgz -C /distrib
 
