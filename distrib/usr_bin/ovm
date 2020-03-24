@@ -1,0 +1,4 @@
+#!/bin/sh
+OSPATH=/usr/share/oscript
+mono $OSPATH/ovm.exe "$@"
+
