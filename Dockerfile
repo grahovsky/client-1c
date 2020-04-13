@@ -40,8 +40,10 @@ RUN yum -y update; yum -y install \
     xorg-x11-font-utils \
     # Install ImageMagick
     ImageMagick \
-    # Install webkitgtk
-    webkitgtk3 webkitgtk3-devel \
+    # Install webkitgtk (x64)
+    # webkitgtk3 webkitgtk3-devel \
+    # Install glib (x32)
+    # glib2.i686 \
     # Install mono
     mono-core mono-locale-extras \
     # Install Xvfb
@@ -56,9 +58,15 @@ RUN yum -y update; yum -y install \
 # copy files
 ADD distrib/ /distrib/
 
-# Install dependences
-RUN rpm -Uvh /distrib/rpm/lib/gtk2-2.24.31-1.el7.x86_64.rpm \ 
-    /distrib/rpm/lib/webkitgtk-2.4.9-1.2.x86_64.rpm
+# Install dependences x32
+RUN yum -y update; yum localinstall -y \
+    /distrib/rpm/lib/libicu-4.2.1-15.el6_10.i686.rpm \
+    /distrib/rpm/lib/webkitgtk-1.4.3-9.el6_6.i686.rpm \
+    ;yum clean all
+
+# Install dependences x64
+#RUN rpm -Uvh /distrib/rpm/lib/gtk2-2.24.31-1.el7.x86_64.rpm
+#    /distrib/rpm/lib/webkitgtk-2.4.9-1.2.x86_64.rpm
 
 # OKD
 ENV OKD_USER_ID 1001080000
@@ -67,9 +75,9 @@ RUN groupadd -f --gid $OKD_USER_ID grp1cv8 && \
     useradd --uid $OKD_USER_ID --gid $OKD_USER_ID --comment '1C Enterprise 8 server launcher' --no-log-init --home-dir /home/usr1cv8 usr1cv8
     
 # Install 1c
-RUN rpm -Uvh /distrib/rpm/1C_Enterprise83-common-8.3.10-2699.x86_64.rpm \
-    /distrib/rpm/1C_Enterprise83-server-8.3.10-2699.x86_64.rpm \
-    /distrib/rpm/1C_Enterprise83-client-8.3.10-2699.x86_64.rpm
+RUN rpm -Uvh /distrib/rpm/1C_Enterprise83-common-*.rpm \
+    /distrib/rpm/1C_Enterprise83-server-*.rpm \
+    /distrib/rpm/1C_Enterprise83-client-*.rpm
 
 # Install oscript
 RUN rpm -Uvh /distrib/rpm/lib/onescript-engine-1.2.0-1.fc26.noarch.rpm && \
@@ -87,7 +95,7 @@ RUN sed -i 's/kill \$XVFBPID/\#kill \$XVFBPID/g' /usr/bin/xvfb-run
 # RUN tar -zxf /distrib/allure_2_12.tgz -C /distrib
 
 # Add premission add directory
-Run mkdir /opt/1C/v8.3/x86_64/conf/ && chown -R usr1cv8:grp1cv8 /opt/1C/v8.3/x86_64/conf/ && \
+Run mkdir /opt/1C/v8.3/i386/conf/ && chown -R usr1cv8:grp1cv8 /opt/1C/v8.3/i386/conf/ && \
     mkdir /usr/share/fonts/truetype/ && cp /distrib/fonts/* /usr/share/fonts/truetype/ && \
     mkdir -p /var/log/1c/ && chown -R usr1cv8:grp1cv8 /var/log/1c && chmod 755 /var/log/1c/ && \
     chmod 777 /etc/hosts
@@ -103,7 +111,7 @@ ENV VNC_PORT=$VNC_PORT
 EXPOSE $VNC_PORT
 
 # Add path 1c
-ENV PATH="/opt/1C/v8.3/x86_64:${PATH}"
+ENV PATH="/opt/1C/v8.3/i386:${PATH}"
 # Add path allure
 # ENV PATH="/distrib/allure_2_12/bin:${PATH}"
 # ENV ALLURE_HOME="/distrib/allure_2_12"
@@ -125,10 +133,10 @@ RUN mkdir -p /home/usr1cv8/.fonts/ && cp /distrib/fonts/* /home/usr1cv8/.fonts/ 
 
 # Add config 1c
 ADD /config/ /distrib/config/
-RUN echo "DisableUnsafeActionProtection=.*" >> /opt/1C/v8.3/x86_64/conf/conf.cfg
+RUN echo "DisableUnsafeActionProtection=.*" >> /opt/1C/v8.3/i386/conf/conf.cfg
 
 # Add nethasp
-RUN mkdir -p  /opt/1C/v8.3/x86_64/conf/ && cp /distrib/config/nethasp.ini /opt/1C/v8.3/x86_64/conf/
+RUN mkdir -p  /opt/1C/v8.3/i386/conf/ && cp /distrib/config/nethasp.ini /opt/1C/v8.3/i386/conf/
 
 Add entrypoint.sh /tmp/
 

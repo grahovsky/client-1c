@@ -1,3 +1,9 @@
--rw-rw-r--. 1 grahovsky grahovsky 235044746 фев 11 18:19 1C_Enterprise83-client-8.3.10-2699.x86_64.rpm
--rw-rw-r--. 1 grahovsky grahovsky  38033639 фев 11 18:14 1C_Enterprise83-common-8.3.10-2699.x86_64.rpm
--rw-rw-r--. 1 grahovsky grahovsky 205533308 фев 11 18:14 1C_Enterprise83-server-8.3.10-2699.x86_64.rpm
+total 462380
+drwxrwxr-x. 3 grahovsky grahovsky       203 Apr 12 11:23 .
+drwxrwxr-x. 5 grahovsky grahovsky        90 Mar 24 14:02 ..
+-rw-rw-r--. 1 grahovsky grahovsky 234067132 Nov 28  2017 1C_Enterprise83-client-8.3.10-2699.i386.rpm
+-rw-rw-r--. 1 grahovsky grahovsky  37639558 Nov 28  2017 1C_Enterprise83-common-8.3.10-2699.i386.rpm
+-rw-rw-r--. 1 grahovsky grahovsky 201758872 Nov 28  2017 1C_Enterprise83-server-8.3.10-2699.i386.rpm
+drwxrwxr-x. 2 grahovsky grahovsky       178 Apr 13 10:31 lib
+-rw-rw-r--. 1 grahovsky grahovsky         0 Apr 13 10:38 listrpm
+-rwxrwxr-x. 1 grahovsky grahovsky      3743 Apr 12 11:17 loadRpm.sh

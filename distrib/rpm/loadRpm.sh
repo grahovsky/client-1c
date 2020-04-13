@@ -1,30 +1,27 @@
 #!/bin/bash
-#set -x
+set -x
+set -e
 
-if [ -z "$V8USER" ]
+if [ -z "$ONEC_USERNAME" ]
 then
-    echo "USERNAME not set"
+    echo "ONEC_USERNAME not set"
     exit 1
 fi
 
-if [ -z "$V8PASSW" ]
+if [ -z "$ONEC_PASSWORD" ]
 then
-    echo "PASSWORD not set"
+    echo "ONEC_PASSWORD not set"
     exit 1
 fi
 
-V8VERSION="$1"
-DOWNLOADIR="$2"
-
-if [ -z "$V8VERSION" ]
+if [ -z "$ONEC_VERSION" ]
 then
-    echo "VERSION not set"
+    echo "ONEC_VERSION not set"
     exit 1
 fi
 
 SRC=$(curl -c /tmp/cookies.txt -s -L https://releases.1c.ru)
-ACTION=$(echo "$SRC" | grep -oP '(?<=form id="loginForm" action=")[^"]+(?=")') 
-LT=$(echo "$SRC" | grep -oP '(?<=input type="hidden" name="lt" value=")[^"]+(?=")')
+ACTION=$(echo "$SRC" | grep -oP '(?<=form method="post" id="loginForm" action=")[^"]+(?=")')
 EXECUTION=$(echo "$SRC" | grep -oP '(?<=input type="hidden" name="execution" value=")[^"]+(?=")')
 
 curl -s -L \
@@ -32,29 +29,80 @@ curl -s -L \
     -b /tmp/cookies.txt \
     -c /tmp/cookies.txt \
     --data-urlencode "inviteCode=" \
-    --data-urlencode "lt=$LT" \
     --data-urlencode "execution=$EXECUTION" \
     --data-urlencode "_eventId=submit" \
-    --data-urlencode "username=$V8USER" \
-    --data-urlencode "password=$V8PASSW" \
+    --data-urlencode "username=$ONEC_USERNAME" \
+    --data-urlencode "password=$ONEC_PASSWORD" \
     https://login.1c.ru"$ACTION"
 
-if ! grep -q "onec_security" /tmp/cookies.txt
+if ! grep -q "TGC" /tmp/cookies.txt
 then
     echo "Auth failed"
     exit 1
 fi
 
-texttodownload="Скачать дистрибутив"
-
 CLIENTLINK=$(curl -s -G \
     -b /tmp/cookies.txt \
     --data-urlencode "nick=Platform83" \
-    --data-urlencode "ver=$V8VERSION" \
-    --data-urlencode "path=Platform\\${V8VERSION//./_}\\Platform\8_3_10_2699\client.rpm32.tar.gz" \
-    https://releases.1c.ru/version_file | grep -oP '(?<=a href=")[^"]+(?=">Скачать дистрибутив)')
-echo $CLIENTLINK
+    --data-urlencode "ver=$ONEC_VERSION" \
+    --data-urlencode "path=Platform\\${ONEC_VERSION//./_}\\client.rpm64.tar.gz" \
+    https://releases.1c.ru/version_file | grep -oP '(?<=a href=")[^"]+(?=">Скачать дистрибутив<)')
 
-wget --continue --load-cookies /tmp/cookies.txt -O ./client.rpm32.tar.gz "$SERVERINK"
+CLIENT32LINK=$(curl -s -G \
+    -b /tmp/cookies.txt \
+    --data-urlencode "nick=Platform83" \
+    --data-urlencode "ver=$ONEC_VERSION" \
+    --data-urlencode "path=Platform\\${ONEC_VERSION//./_}\\client.rpm32.tar.gz" \
+    https://releases.1c.ru/version_file | grep -oP '(?<=a href=")[^"]+(?=">Скачать дистрибутив<)')
+
+THINCLIENTLINK=$(curl -s -G \
+    -b /tmp/cookies.txt \
+    --data-urlencode "nick=Platform83" \
+    --data-urlencode "ver=$ONEC_VERSION" \
+    --data-urlencode "path=Platform\\${ONEC_VERSION//./_}\\thin.client.rpm64.tar.gz" \
+    https://releases.1c.ru/version_file | grep -oP '(?<=a href=")[^"]+(?=">Скачать дистрибутив<)')
+
+THINCLIENT32LINK=$(curl -s -G \
+    -b /tmp/cookies.txt \
+    --data-urlencode "nick=Platform83" \
+    --data-urlencode "ver=$ONEC_VERSION" \
+    --data-urlencode "path=Platform\\${ONEC_VERSION//./_}\\thin.client.rpm32.tar.gz" \
+    https://releases.1c.ru/version_file | grep -oP '(?<=a href=")[^"]+(?=">Скачать дистрибутив<)')
+
+SERVERLINK=$(curl -s -G \
+    -b /tmp/cookies.txt \
+    --data-urlencode "nick=Platform83" \
+    --data-urlencode "ver=$ONEC_VERSION" \
+    --data-urlencode "path=Platform\\${ONEC_VERSION//./_}\\rpm64.tar.gz" \
+    https://releases.1c.ru/version_file | grep -oP '(?<=a href=")[^"]+(?=">Скачать дистрибутив<)')
+
+SERVER32LINK=$(curl -s -G \
+    -b /tmp/cookies.txt \
+    --data-urlencode "nick=Platform83" \
+    --data-urlencode "ver=$ONEC_VERSION" \
+    --data-urlencode "path=Platform\\${ONEC_VERSION//./_}\\rpm.tar.gz" \
+    https://releases.1c.ru/version_file | grep -oP '(?<=a href=")[^"]+(?=">Скачать дистрибутив<)')
+
+case "$installer_type" in
+  server)
+      curl --fail -b /tmp/cookies.txt -o server.tar.gz -L "$SERVERLINK"
+      ;;
+  server32)
+      curl --fail -b /tmp/cookies.txt -o server32.tar.gz -L "$SERVER32LINK"
+      ;;
+  client)
+      curl --fail -b /tmp/cookies.txt -o server.tar.gz -L "$SERVERLINK"
+      curl --fail -b /tmp/cookies.txt -o client.tar.gz -L "$CLIENTLINK"
+      ;;
+  client32)
+      curl --fail -b /tmp/cookies.txt -o server32.tar.gz -L "$SERVER32LINK"
+      curl --fail -b /tmp/cookies.txt -o client32.tar.gz -L "$CLIENT32LINK"
+      ;;
+  thin-client)
+      curl --fail -b /tmp/cookies.txt -o thin-client.tar.gz -L "$THINCLIENTLINK"
+      ;;
+  thin-client32)
+      curl --fail -b /tmp/cookies.txt -o thin-client32.tar.gz -L "$THINCLIENT32LINK"
+esac
 
 rm /tmp/cookies.txt
