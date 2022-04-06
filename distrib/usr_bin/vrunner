@@ -1,2 +1,0 @@
-#!/bin/bash
-oscript "/usr/share/oscript/lib/vanessa-runner/src/main.os" "$@"
